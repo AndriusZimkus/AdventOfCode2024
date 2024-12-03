@@ -2,7 +2,7 @@
 
 firsts = []
 seconds = []
-with open('11_input.txt', 'r') as file:
+with open('input.txt', 'r') as file:
 	for line in file: # read rest of lines
 		currentRow = []
 		xs = line.strip().split();
