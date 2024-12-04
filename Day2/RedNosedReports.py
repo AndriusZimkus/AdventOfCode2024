@@ -2,7 +2,7 @@ reports = []
 with open('input.txt', 'r') as file:
 	for line in file: # read rest of lines
 		currentRow = []
-		for x in line:
+		for x in line.strip().split():
 			currentRow.append(int(x))
 		reports.append(currentRow)
 
