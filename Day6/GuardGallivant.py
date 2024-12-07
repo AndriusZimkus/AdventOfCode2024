@@ -6,8 +6,6 @@ with open('input.txt', 'r') as file:
                 currentRow = list(line.strip())
                 matrix.append(currentRow)
 
-#for row in matrix:
-#        print(row)
 initialMatrix = matrix.copy()
 
 isVisitedMatrix = []
@@ -69,8 +67,7 @@ def traverseMap (gp,currentDirection,matrix):
                                 visitedObstacles[nextCell] = [currentDirection]
                         else:
                                 if currentDirection in visitedObstacles[nextCell]:
-                                        #print (nextCell[0],nextCell[1])
-                                        #Loop
+                                        #Stuck in loop - repeated visit of obstacle from direction
                                         return False
                                 visitedObstacles[nextCell].append(currentDirection)
 
@@ -81,16 +78,16 @@ def traverseMap (gp,currentDirection,matrix):
                         isVisitedMatrix[nextCell[0]][nextCell[1]] = 1
                         gp = nextCell
 
-                #print(visitedObstacles)
 
 print(traverseMap(gp, currentDirection, matrix))
 visitedCount = 0
 for row in isVisitedMatrix:
-        #print(row)
         for cell in row:
                 visitedCount += cell
 print("Visited count:", visitedCount)
 
+
+#Part 2
 obstacleCount = 0
 currentMatrix = initialMatrix.copy()
 gp = copy.copy(initialGP)
@@ -103,13 +100,12 @@ while True:
         if (nextCell[0] == len(matrix) or nextCell[0] == -1
         or nextCell[1] == len(matrix[0]) or nextCell[1] == -1):
                         break
-        #print(nextCell)
+
         isTested = isTestedMatrix[nextCell[0]][nextCell[1]]
         nextCellValue = currentMatrix[nextCell[0]][nextCell[1]]
-        #print("isTested,nextCellValue",isTested,nextCellValue)
 
         if not isTested and nextCellValue == ".":
-                #print("Testing:", nextCell)
+
                 savedDirection = copy.copy(currentDirection)
                 isTestedMatrix[nextCell[0]][nextCell[1]] = True
                 currentMatrix[nextCell[0]][nextCell[1]] = "#"
@@ -121,9 +117,7 @@ while True:
                         currentMatrix[nextCell[0]][nextCell[1]] = "."
                 else:
                         currentMatrix[nextCell[0]][nextCell[1]] = "."
-                        #Exited successfully
-                        #Reset variables
-                        currentMatrix = initialMatrix.copy()
+                        #Exited successfully - reset variables
                         gp = copy.copy(initialGP)
                         currentDirection = "up"
                         continue
