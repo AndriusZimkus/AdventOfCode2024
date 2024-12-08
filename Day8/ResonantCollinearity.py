@@ -1,6 +1,6 @@
 matrix = []
 antennas = {}
-with open('test.txt', 'r') as file:
+with open('input.txt', 'r') as file:
         for line in file:
                 currentRow = list(line.strip())
                 matrix.append(currentRow)
@@ -72,6 +72,7 @@ for antenna in antennas:
                 currentPosition = positions[i]
                 cpY = currentPosition[0]
                 cpX = currentPosition[1]
+                hasAntinodeMatrix[cpY][cpX] = True
                 for j in range(i+1,len(positions)):
                         otherPosition = positions[j]
                         opY = otherPosition[0]
@@ -103,6 +104,7 @@ for antenna in antennas:
 
 antinodeCount = 0
 for row in hasAntinodeMatrix:
+        #print(row)
         for cell in row:
                 if cell:
                        antinodeCount += 1 
