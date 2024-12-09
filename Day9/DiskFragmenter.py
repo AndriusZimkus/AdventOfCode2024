@@ -1,30 +1,37 @@
-with open('input.txt', 'r') as file:
-        text = file.read().strip()
+def main():
+    with open('input.txt', 'r') as file:
+            text = file.read().strip()
 
-numbers = []
-for number in text:
-    numbers.append(int(number))
-#print (numbers)
+    numbers = []
+    for number in text:
+        numbers.append(int(number))
+    #print (numbers)
 
-disk = []
+    disk = []
 
-#Fill disk
-isData = True
-currentIndex = 0
-for number in numbers:
-    for i in range(number):
+    #Fill disk
+    isData = True
+    currentIndex = 0
+    for number in numbers:
+        for i in range(number):
+            if isData:
+                disk.append(currentIndex)
+            else:
+                disk.append(".")
+
         if isData:
-            disk.append(currentIndex)
-        else:
-            disk.append(".")
+            currentIndex += 1
+        isData = not isData
 
-    if isData:
-        currentIndex += 1
-    isData = not isData
+    #print ("Unfragmented:",disk)
 
-#print ("Unfragmented:",disk)
+    disk2 = disk.copy()
 
-disk2 = disk.copy()
+    fragmentDisk (disk)
+    print("checkSum:", countDiskCheckSum(disk))
+
+    fragmentDisk2(disk2)
+    print("checkSum:", countDiskCheckSum(disk2))
 
 #Fragment disk
 def fragmentDisk (disk):
@@ -46,7 +53,7 @@ def fragmentDisk (disk):
         #swap
         disk[start],disk[end] = disk[end], disk[start]
 
-fragmentDisk (disk)
+
 
 def countDiskCheckSum(disk):
     checkSum = 0
@@ -57,7 +64,7 @@ def countDiskCheckSum(disk):
             pass
     return checkSum
     
-print("checkSum:", countDiskCheckSum(disk))
+
 
 #print(*disk2)
 
@@ -141,5 +148,6 @@ def fragmentDisk2 (disk):
         currentID -= 1
         #print(*disk2)
 
-fragmentDisk2(disk2)
-print("checkSum:", countDiskCheckSum(disk2))
+
+if __name__ == "__main__":
+    main()
