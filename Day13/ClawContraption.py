@@ -53,6 +53,21 @@ def main():
 
     print (newMachines)
 
+    for machine in NewMachines:
+        targetX = machine['target'][0]
+        targetY = machine['target'][1]
+        
+        B1X = machine['buttons'][0][0]
+        B1Y = machine['buttons'][0][1]
+        B2X = machine['buttons'][1][0]
+        B2Y = machine['buttons'][1][1]
+
+        if B1X > B2Y * 3 or B1Y > B2Y*3:
+            useB1 == True
+        else:
+            useB1 = False
+        
+
     #minimumPrice = 0
     #for machine in newMachines:
     #    currentPrice = bestMachinePrice(machine)
