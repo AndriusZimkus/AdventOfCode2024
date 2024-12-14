@@ -1,7 +1,7 @@
-import math
+import os
 def main():
-
-    with open("input.txt", 'r') as file:
+    path = "../../Advent Of Code Cases/Day14/input.txt"
+    with open(path, 'r') as file:
 
         i = 0
 
