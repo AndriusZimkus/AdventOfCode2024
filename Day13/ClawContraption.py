@@ -1,6 +1,7 @@
+import math
 def main():
 
-    with open("test.txt", 'r') as file:
+    with open("input.txt", 'r') as file:
 
         i = 0
 
@@ -36,7 +37,9 @@ def main():
 
     minimumPrice = 0
     for machine in machines:
+
         currentPrice = bestMachinePrice(machine)
+        #print(currentPrice)
         minimumPrice += currentPrice
 
     print ("Minimum price:",minimumPrice)
@@ -46,60 +49,51 @@ def main():
     for machine in machines:
         buttons = machine['buttons']
         target = machine['target']
-        newTargetX = int('10000000000000' + str(target[0]))
-        newTargetY = int('10000000000000' + str(target[1]))
+        newTargetX = 10000000000000 + target[0]
+        newTargetY = 10000000000000 + target[1]
         newMachine = {"buttons":buttons, "target":(newTargetX,newTargetY)}
         newMachines.append(newMachine)
 
-    print (newMachines)
+
+    newMinPrice = 0
+
+    for machine in machines:
+        newMinPrice += getMachinePrice_algebra(machine)
+
+    print ("Minimum price, part 1, newMethod:",round(newMinPrice))
+
+    newMinPrice = 0
 
     for machine in newMachines:
-        targetX = machine['target'][0]
-        targetY = machine['target'][1]
-        
-        B1X = machine['buttons'][0][0]
-        B1Y = machine['buttons'][0][1]
-        B2X = machine['buttons'][1][0]
-        B2Y = machine['buttons'][1][1]
-
-        targetTotal = targetX + targetY
-        B1T = B1X + B1Y
-        B2T = B2X + B2Y
-
-        if B1T > B2T * 3:
-            useB1 == True
-        else:
-            useB1 = False
-
-        BT = B1T if useB1 else B2T
-        BP = 3 if useB1 else 1
-
-        times = targetTotal // BT
-        #print(times)
-
-        initialPrice = times * BP
-        #print(initialPrice)
-
-        BX = B1X if useB1 else B2X
-        BY = B1Y if useB1 else B2Y
-
-        print(BX,BY)
-        newX = targetX - BX*times
-        newY = targetY - BY*times
-
-        print(newX,newY)
-        
-
-    #minimumPrice = 0
-    #for machine in newMachines:
-    #    currentPrice = bestMachinePrice(machine)
-    #    minimumPrice += currentPrice
-
-    #print ("Minimum price, part 2:",minimumPrice)
-
+            newMinPrice += getMachinePrice_algebra(machine)
+ 
+    print ("Minimum price, part 2, newMethod:",round(newMinPrice))
     
-def bestMachinePrice(machine):
+def getMachinePrice_algebra(machine):
+    targetX = machine['target'][0]
+    targetY = machine['target'][1]
+    
+    B1X = machine['buttons'][0][0]
+    B1Y = machine['buttons'][0][1]
+    B2X = machine['buttons'][1][0]
+    B2Y = machine['buttons'][1][1]
+    
+    B2C = (B1X*targetY-B1Y*targetX) / ((B1X*B2Y)-(B1Y*B2X))
 
+    B1C = ((targetY*B2X)-(targetX*B2Y)) / ((B2X*B1Y)-(B2Y*B1X))
+
+    B2CA = (B1X*targetY-B1Y*targetX) // ((B1X*B2Y)-(B1Y*B2X))
+    B1CA = ((targetY*B2X)-(targetX*B2Y)) // ((B2X*B1Y)-(B2Y*B1X))
+    
+    if B2C < 0 or B1C < 0 or B2CA != B2C or B1CA != B1C:
+        price = 0
+    else:
+        price = B1C*3+B2C*1
+
+    return price
+
+
+def bestMachinePrice(machine):
     return getMachinePriceHelper(machine)
 
 def getMachinePriceHelper(machine):
@@ -155,3 +149,4 @@ def getMachinePriceHelper(machine):
 
 if __name__ == "__main__":
     main()
+
