@@ -81,6 +81,8 @@ def main():
             d.text((1,1), res, fill=(255,255,255))
 
             img.save('text'+str(i)+'.png')
+            
+            break
 
 def printMatrix(robotCounts):
     for row in robotCounts:
