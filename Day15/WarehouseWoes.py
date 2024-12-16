@@ -1,6 +1,5 @@
-
 def main():
-    fileName = "test2.txt"
+    fileName = "input.txt"
             
     path = "../../Advent Of Code Cases/Day15/" + fileName
 
@@ -29,8 +28,6 @@ def main():
             if warehouse[i][j] == "@":
                 rp = (j,i)
                         
-    print(rp)
-
     i = 0
     for step in list(instructions):
         rp,isMoved = moveCell_Part1(warehouse,rp,step,rp)
@@ -45,21 +42,22 @@ def main():
             if newWarehouse[i][j] == "@":
                 rp = (j,i)
                 
-    for row in newWarehouse:
-        print(*row)
+    #for row in newWarehouse:
+    #    print(*row)
 
     i = 0
     for step in list(instructions):
         #print("Step",i+1,step)
-        rp = moveCell_Part2(newWarehouse,rp,step,rp)
+        rp,hasMoved = moveCell_Part2(newWarehouse,rp,step)
         i += 1
-        #if i > 155:
-        #    for row in newWarehouse:
-        #        print(*row)
-        #if i > 5:
-        #    break
-    for row in newWarehouse:
-        print(*row)
+
+
+    #for row in newWarehouse:
+    #    print(*row)
+
+    gpsSum = getGPSSum(newWarehouse)
+    print("Part 2, GPS sum:", gpsSum)
+
 
 
 def moveCell_Part1(warehouse,cell,step,rp):
@@ -113,168 +111,12 @@ def getGPSSum(warehouse):
     for i in range(len(warehouse)):
         for j in range(len(warehouse[0])):
             symbol = warehouse[i][j]
-            if symbol == "O":
+            if symbol == "O" or symbol == "[":
                 gpsSum += i*100+j
     return gpsSum
 
-def moveCell_Part2(warehouse,cell,step,rp):
-
-    #print("Cell",cell)
-    canMove = canCellMove(warehouse,cell,step)
-
-    if canMove:
-        rp = performMove(warehouse,cell,step,rp)
-
-    return rp
-
-def performMove(warehouse,cell,step,rp):
-    cx = cell[0]
-    cy = cell[1]
-
-    if step == "<":
-        vx = -1
-        vy = 0
-    elif step == "^":
-        vx = 0
-        vy = -1
-    elif step == ">":
-        vx = 1
-        vy = 0
-    elif step == "v":
-        vx = 0
-        vy = 1
-    else:
-        return rp
-    
-    symbol = warehouse[cy][cx]
-    nextSymbol = warehouse[cy+vy][cx+vx]
-    
-    if nextSymbol == ".":
-        warehouse[cy][cx],warehouse[cy+vy][cx+vx] = warehouse[cy+vy][cx+vx],warehouse[cy][cx]
-        if symbol == "@":
-            rp = (cx+vx,cy+vy)
-        return rp
-    
-    elif nextSymbol == "#":
-        return rp
-
-    elif nextSymbol == "[" or nextSymbol == "]":
-        rp = moveBox(warehouse,(cx+vx,cy+vy),step,rp)
-        if symbol == "@":
-            rp = performMove(warehouse,cell,step,rp)
-        return rp
-    else:
-        return rp 
-
-def moveBox(warehouse,cell,step,rp):
-    if step == "<" or step == ">":
-        cx = cell[0]
-        cy = cell[1]
-        nextCell = getNextCell(warehouse,cell,step)
-
-        nextSymbol = warehouse[nextCell[1]][nextCell[0]]
-
-        #Move other out of the way
-        if nextSymbol == "[" or nextSymbol == "]":
-            rp = moveBox(warehouse,nextCell,step,rp)
-        else:
-            rp = performMove(warehouse,nextCell,step,rp)
-
-        #Move self
-        return performMove(warehouse,cell,step,rp)
-    else:
-        #Up Down
-        cx = cell[0]
-        cy = cell[1]
-        symbol = warehouse[cy][cx]
-        #print("Symbol",symbol,"Cell",cell)
-        
-        nc1 = getNextCell(warehouse,cell,step)
-
-        ns1 = warehouse[nc1[1]][nc1[0]]
-
-        if symbol == "[":
-            ox = cx + 1
-        else:
-            ox = cx - 1
-
-        other = (ox,cy)
-        nc2 = getNextCell(warehouse,other,step)
-
-        #Move above/below boxes
-        if symbol == ns1:
-            rp = moveBox(warehouse,nc1,step,rp)
-        elif (symbol == "[" and ns1 == "]") or (symbol == "]" and ns1 == "[") :
-            #print("Two boxes")
-            rp = moveBox(warehouse,nc1,step,rp)
-            rp = moveBox(warehouse,nc2,step,rp)
-
-        #Move oneself
-        rp = performMove(warehouse,cell,step,rp)
-        rp = performMove(warehouse,(ox,cy),step,rp)
-
-        return rp
-
-    
-def canCellMove(warehouse,cell,step):
-    cx = cell[0]
-    cy = cell[1]
-
-    if step == "<":
-        vx = -1
-        vy = 0
-    elif step == "^":
-        vx = 0
-        vy = -1
-    elif step == ">":
-        vx = 1
-        vy = 0
-    elif step == "v":
-        vx = 0
-        vy = 1
-    else:
-        return False
-
-    symbol = warehouse[cy][cx]
-    nextSymbol = warehouse[cy+vy][cx+vx]
-
-    if nextSymbol == ".":
-        return True
-    elif nextSymbol == "#":
-        return False
-    elif nextSymbol == "[" or nextSymbol == "]":
-        return canBoxMove(warehouse,cell,step)   
-    return False
-
-def canBoxMove(warehouse,cell,step):
-    if step == "<" or step == ">":
-        return canCellMove(warehouse,getNextCell(warehouse,cell,step),step)
-    else:
-        cx = cell[0]
-        cy = cell[1]
-        symbol = warehouse[cy][cx]
-
-        if symbol == "[":
-            ox = cx+1
-        else:
-            ox = cx-1
-
-        nc1 = getNextCell(warehouse,cell,step)
-        nc2 = getNextCell(warehouse,(ox,cy),step)
-
-        ns1 = warehouse[nc1[1]] [nc1[0]]
-        ns2 = warehouse[nc2[1]] [nc2[0]]
-        if ns1 == "." and ns2 == ".":
-            return True
-        elif ns1 == "#" or ns2 == "#":
-            return False
-        elif symbol == ns1:
-            return canBoxMove(warehouse,nc1,step)
-        else:
-            return canBoxMove(warehouse,nc1,step) and canBoxMove(warehouse,nc2,step)
-
-
-def getNextCell(warehouse,cell,step):
+#Part 2
+def getNextCell(cell,step):
     cx = cell[0]
     cy = cell[1]
     if step == "<":
@@ -293,6 +135,118 @@ def getNextCell(warehouse,cell,step):
         return cell
 
     return (cx+vx,cy+vy)
+
+def moveCell_Part2(warehouse,cell,step):
+    nextCell = getNextCell(cell,step)
+    
+    symbol = getCell(warehouse,cell)
+    nextSymbol = getCell(warehouse,nextCell)
+    isHorizontalStep = (step == ">" or step == "<")
+    isNextBox = isBoxSymbol(nextSymbol)
+
+    if nextSymbol == ".":
+        swapCells(warehouse,cell,nextCell)
+        if symbol == "@":
+            cell = nextCell
+        return cell, True
+    elif nextSymbol == "#":
+        return cell,False
+    elif isNextBox and isHorizontalStep:
+        #print("Cell",cell)
+        otherCell, hasNextMoved = moveCell_Part2(warehouse,nextCell,step)
+        hasMoved = False
+        if hasNextMoved:
+            cell, hasMoved = moveCell_Part2(warehouse,cell,step)
+        return cell, hasMoved
+    elif isNextBox and not isHorizontalStep:
+        if nextSymbol == "[":
+            box = nextCell
+        else:
+            box = (nextCell[0]-1,nextCell[1])
+        boxes = [box]
+        hasBoxMoved = moveBoxesVertically(warehouse,step,boxes)
+        
+        hasMoved = False
+        if hasBoxMoved:
+            cell, hasMoved = moveCell_Part2(warehouse,cell,step)
+        return cell, hasMoved
+    
+    else:
+        return cell,False
+    
+def moveBoxesVertically(warehouse,step,boxes):
+    
+    newBoxes = []
+    #Check all beyond boxes
+    for box in boxes:
+        bx = box[0]
+        by = box[1]
+        boxRight = (bx+1,by)
+
+        nextCell_1 = getNextCell(box,step)
+        nextCell_2 = getNextCell(boxRight,step)
+        nextSymbol_1 = getCell(warehouse,nextCell_1)
+        nextSymbol_2 = getCell(warehouse,nextCell_2)
+
+        if nextSymbol_1 == "#" or nextSymbol_2 == "#":
+            return False
+
+        if isBoxSymbol(nextSymbol_1):
+            
+            if nextSymbol_1 == "[":
+                newBox = nextCell_1
+            else:
+                newBox = (nextCell_1[0]-1,nextCell_1[1])
+
+            if not newBox in newBoxes:
+                newBoxes.append(newBox)
+
+        if isBoxSymbol(nextSymbol_2):
+            if nextSymbol_2 == "[":
+                newBox = nextCell_2
+            else:
+                newBox = (nextCell_2[0]-1,nextCell_2[1])
+
+            if not newBox in newBoxes:
+                newBoxes.append(newBox)
+
+    if len(newBoxes) > 0:
+        haveBoxesMoved = moveBoxesVertically(warehouse,step,newBoxes)
+    else:
+        haveBoxesMoved = True
+
+    if not haveBoxesMoved:
+        return False
+
+    #Move boxes
+    for box in boxes:
+        bx = box[0]
+        by = box[1]
+        boxRight = (bx+1,by)
+        nextCell_1 = getNextCell(box,step)
+        nextCell_2 = getNextCell(boxRight,step)
+        
+        swapCells(warehouse,box,nextCell_1)
+        swapCells(warehouse,boxRight,nextCell_2)
+
+    return True
+
+
+def getCell(warehouse,cell):
+    x = cell[0]
+    y = cell[1]
+    return warehouse[y][x]
+    
+def swapCells(warehouse,cell,nextCell):
+    x1 = cell[0]
+    y1 = cell[1]
+    x2 = nextCell[0]
+    y2 = nextCell[1]
+
+    warehouse[y1][x1], warehouse[y2][x2] = warehouse[y2][x2],warehouse[y1][x1]
+
+def isBoxSymbol(symbol):
+    return (symbol == "[" or symbol == "]")
 
 def transformWarehouse(warehouse):
     newWarehouse = []
