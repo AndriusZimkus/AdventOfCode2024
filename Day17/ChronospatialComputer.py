@@ -14,17 +14,72 @@ def main(fileName):
                     a = int(value)
                 elif "Register B" in line:
                     b = int(value)
+                    initB = int(value)
                 elif "Register C" in line:
                     c = int(value)
+                    initC = int(value)
                 elif "Program" in line:
                     program = [int(x) for x in value.split(",")]
             except:
                 continue
             
-    i = 0
-    s = ""
+
+
     #print(program)
     print("Filename:",fileName)
+    s,newA,newB,newC = executeProgram(program,a,b,c,False)
+
+    print("Register A:",newA)
+    print("Register B:",newB)
+    print("Register C:",newC)
+    print("Part 1 result:",s)
+
+
+    a = 0
+    iteration = 8**8
+    a = 74538687 #7
+    a = 78732909
+    a = 2242993773 #9
+    a = 78732909 # 8
+    
+    matchedCount = 0
+
+    print("Program",program)
+    while True:
+        #print("A in register:",a)
+            
+        s,newA,newB,newC = executeProgram(program,a,b,c,True)
+        matches = matchCount(s,program)
+
+        if matches > matchedCount:
+
+            print("Matches",matches)
+            print(s)
+            print("Iteration",a)
+            matchedCount = matches
+            iteration = matches**matches 
+            #iteration*=2
+            #iteration+=1
+            #iteration=matches+1
+            
+
+        if s == program:
+            break
+        
+        a+=iteration
+    print("Register A:",a)
+    print("Part 2 result:",s)
+    print("Part 2 program:",program)
+    
+def matchCount(a1,a2):
+    matches = 0
+    for j in range (len(a1)):
+        if a1[j] != a2[j]:
+            return j
+    return len(a1)
+def executeProgram(program,a,b,c,matchProgram):
+    i = 0
+    s = []
     while i < len(program):
         opcode = program[i]
         operand = program[i+1]
@@ -32,17 +87,32 @@ def main(fileName):
         #print("opcode",opcode)
         #print("operand",operand)
 
-        s,a,b,c,i = performCommand(opcode,operand,a,b,c,s,i)
+        s,a,b,c,i = performCommand(opcode,operand,a,b,c,s,i,matchProgram)
 
 
-    print("Register A:",a)
-    print("Register B:",b)
-    print("Register C:",c)
-    print("Result:",s)
+        if matchProgram and len(s)>len(program):
+            return s,a,b,c
 
-def performCommand(opcode,operand,a,b,c,s,i):
+        if matchProgram and len(s)>0:
+
+            for j in range (len(s)):
+                if s[j] != program[j]:
+                    return s,a,b,c
+
+    return s,a,b,c
+    
+def performCommand(opcode,operand,a,b,c,s,i,toPrint):
     combo = getCombo(operand,a,b,c)
-    #print(combo)
+    if 0 and toPrint:
+        print("")
+        print("Performing",opcode)
+        print("Operand",operand)
+        print("Combo",combo)
+        print("a",a)
+        print("b",b)
+        print("c",c)
+        print("s",s)
+        
     if opcode == 0:
         result = adv(a,combo)
         return s,result,b,c,i
@@ -62,7 +132,7 @@ def performCommand(opcode,operand,a,b,c,s,i):
         return s,a,result,c,i
     elif opcode == 5:
         result = combo % 8
-        s = addToString(s,result)
+        s.append(result)
         return s,a,b,c,i
     elif opcode == 6:
         result = adv(a,combo)
@@ -97,7 +167,8 @@ def getCombo(operand,a,b,c):
 
     
 if __name__ == "__main__":
-    fileNames = ["test.txt","test2.txt","test3.txt","test4.txt","test5.txt","test6.txt"]
+    #fileNames = ["test.txt","test2.txt","test3.txt","test4.txt","test5.txt","test6.txt"]
+    #fileNames = ["test7.txt"]
     fileNames = ["input.txt"]
     for fileName in fileNames:
         main(fileName)
