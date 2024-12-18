@@ -36,15 +36,28 @@ def main(fileName):
 
 
     a = 0
-    iteration = 8**8
-    a = 74538687 #7
-    a = 78732909
-    a = 2242993773 #9
+    iteration = 8**8 #9
+    a = 68247149 #7
     a = 78732909 # 8
+    a = 2232508013 #9
+    a = 2500943469 #10
+    a = 94303772269 #11
+    a = 144226475629 #13
+
+
     
     matchedCount = 0
 
     print("Program",program)
+
+    #count = 2
+    # 1: 6; 2:
+    #programEnd = program[len(program)-count:]
+    #print(programEnd)
+    a = 144226475629
+    iteration = 8**13
+    #a= 0
+    #iteration = 1
     while True:
         #print("A in register:",a)
             
@@ -57,16 +70,15 @@ def main(fileName):
             print(s)
             print("Iteration",a)
             matchedCount = matches
-            iteration = matches**matches 
-            #iteration*=2
-            #iteration+=1
-            #iteration=matches+1
+            if iteration < 1:
+                iteration = 1
             
 
         if s == program:
             break
         
         a+=iteration
+
     print("Register A:",a)
     print("Part 2 result:",s)
     print("Part 2 program:",program)
