@@ -12,23 +12,34 @@ def main():
 
     global possibleDesigns
     global designsTried
+
     possibleDesigns = {}
     designsTried = {}
+
     #designsPossible = countDesignsPossible_1_slow(patterns,designs)
     designsPossible = countDesignsPossible_1_rec(patterns,designs)
     print("Designs possible:", designsPossible)
-
     
 
 def countDesignsPossible_1_rec(patterns,designs):
     global designsTried
+
+    patternsGrouped = {}
+    for pattern in patterns:
+        firstLetter = pattern[:1]
+
+        if firstLetter in patternsGrouped:
+            patternsGrouped[firstLetter].append(pattern)
+        else:
+            patternsGrouped[firstLetter] = [pattern]
+            
     i = 1
     designsPossible = 0
     for design in designs:
         #print(i)
         #print(design)
         designsTried = {}
-        isCurrentPossible = isDesignPossible_rec(design,patterns,[])
+        isCurrentPossible = isDesignPossible_rec(design,patternsGrouped,[])
         #print(isCurrentPossible)
         if isCurrentPossible:
             designsPossible+=1
@@ -36,7 +47,7 @@ def countDesignsPossible_1_rec(patterns,designs):
         
     return designsPossible
 
-def isDesignPossible_rec(design,patterns,designSequence):
+def isDesignPossible_rec(design,patternsGrouped,designSequence):
     global possibleDesigns
     global designsTried
     #print(designSequence)
@@ -45,12 +56,19 @@ def isDesignPossible_rec(design,patterns,designSequence):
     #print("D",design)
     designsToTry = []
     designsTried[design] = "True"
-    for pattern in patterns:
+    firstLetter = design[:1]
+    try:
+        availablePatterns = patternsGrouped[firstLetter]
+    except:
+        return False
+    for pattern in availablePatterns:
         if design == pattern:
             for d in designSequence:
                 possibleDesigns[d] = True
+                
             return True
         elif design in possibleDesigns:
+
             return True
         elif design[:len(pattern)] == pattern:
             leftoverDesign = design[len(pattern):]
@@ -65,7 +83,7 @@ def isDesignPossible_rec(design,patterns,designSequence):
         for dtt in designsToTry:
             dtt_o = dtt[0]
             ds = dtt[1]
-            inp = isDesignPossible_rec(dtt_o,patterns,ds)
+            inp = isDesignPossible_rec(dtt_o,patternsGrouped,ds)
             if inp:
                 for d in ds:
                     possibleDesigns[d] = True
