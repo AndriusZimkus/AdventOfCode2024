@@ -10,9 +10,9 @@ def main():
         for line in file:
             designs.append(line.strip())
 
-    designsPossible = countDesignsPossible_1_slow(patterns,designs)
+    #designsPossible = countDesignsPossible_1_slow(patterns,designs)
 
-    print("Designs possible:", designsPossible)
+    #print("Designs possible:", designsPossible)
 
 def countDesignsPossible_1_slow(patterns,designs):
 
