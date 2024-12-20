@@ -18,8 +18,101 @@ def main():
 
     #designsPossible = countDesignsPossible_1_slow(patterns,designs)
     designsPossible = countDesignsPossible_1_rec(patterns,designs)
-    print("Designs possible:", designsPossible)
+    print("Designs possible, Part 1:", designsPossible)
+
+    designsPossible = 0
+    cw = 0
+    countOfWays = countDesignWays_2_rec(patterns,designs)
+    for d in countOfWays:
+        cwc = countOfWays[d]
+        cw += cwc
+        if cwc > 0:
+            designsPossible +=1
+
+    print("Designs possible, Part 2:", designsPossible)
+    print("Count of ways, Part 2:", cw)
+        
     
+
+def countDesignWays_2_rec(patterns,designs):
+    countOfWays = {}
+    designWayCounts = {}
+
+    maxLength = 0
+    for pattern in patterns:
+        if len(pattern) > maxLength:
+            maxLength = len(pattern)
+
+    patternsByLength = [[] for x in range(maxLength)]
+    
+    for pattern in patterns:
+        patternsByLength[len(pattern)-1].append(pattern)
+    #print(patternsByLength)
+
+
+    def waysCountForDesign(design):
+        nonlocal designWayCounts
+        nonlocal patternsByLength
+        waysCount = 0
+
+        #if len(design) == 0:
+        #    return 1
+
+        #Already calculated
+        if design in designWayCounts:
+            return designWayCounts[design]
+
+        #Not calculated, calculate ways
+        loopLength = min(len(design),len(patternsByLength))
+        #print("Current design", design)
+        #print("Loop length",loopLength)
+        designsToContinue = []
+        for i in range(loopLength):
+            #print(i)
+            #print(patternsByLength[i])
+            curL = i+1
+
+            for pattern in patternsByLength[i]:
+                #print("Trying",pattern)
+                if pattern == design:
+                    if design in designWayCounts:
+                        designWayCounts[design] += 1
+                        
+                    else:
+                        designWayCounts[design] =1
+
+                    waysCount = designWayCounts[design]
+                    
+                elif design[:curL] == pattern:
+                    leftoverDesign = design[curL:]
+                    #print("Adding",leftoverDesign)
+                    designsToContinue.append(leftoverDesign)
+
+        if len(designsToContinue) == 0:
+            pass
+        else:
+            for des in designsToContinue:
+                waysCount += 1*waysCountForDesign(des)
+    
+
+        #Save ways
+        designWayCounts[design] = waysCount
+
+        return waysCount
+    
+    i = 1
+    for design in designs:
+        #print(i)
+        waysCount = waysCountForDesign(design)
+
+        countOfWays[i] = waysCount
+        i+=1
+
+    return countOfWays
+
+
+
+
 
 def countDesignsPossible_1_rec(patterns,designs):
     global designsTried
