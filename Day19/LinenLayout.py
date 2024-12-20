@@ -17,8 +17,8 @@ def main():
     designsTried = {}
 
     #designsPossible = countDesignsPossible_1_slow(patterns,designs)
-    designsPossible = countDesignsPossible_1_rec(patterns,designs)
-    print("Designs possible, Part 1:", designsPossible)
+    #designsPossible = countDesignsPossible_1_rec(patterns,designs)
+    #print("Designs possible, Part 1:", designsPossible)
 
     designsPossible = 0
     cw = 0
