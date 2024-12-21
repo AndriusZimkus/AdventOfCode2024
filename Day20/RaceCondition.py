@@ -1,6 +1,6 @@
 def main():
  
-    fileName = "test2.txt"
+    fileName = "input.txt"
     path = "../../Advent Of Code Cases/Day20/" + fileName
 
     raceTrack = []
@@ -54,33 +54,45 @@ def main():
     #Part 2
     #Determine all possible cheats
     saves = {}
-    cheats2 = getCheats_Part2(raceTrack,sp)
+    savesOver100 = {}
+    savesOver50 = {}
+    cheats2 = getCheats_Part2(raceTrack,sp,ep)
     #print("Printing cheats")
     for cheat in cheats2:
-        print(cheat)
-        finishPositionsConsidered = []
-        startPos = cheat[0]
-        startPosDist = getMatrixCell(initDistances,startPos)
+        #print(cheat)
 
+        startPos = cheat[0]
         finishPositions = cheat[1]
         for fp in finishPositions:
-            fpPos = fp[0]
-            fpStepCount = fp[1]
-            if fpPos in finishPositionsConsidered:
-                continue
-            finishPositionsConsidered.append(fpPos)
-            finishPosDist = getMatrixCell(initDistances,fpPos)
+            finPos = fp[0]
+            saveValue = fp[1]
+           
 
-            saveValue = finishPosDist-startPosDist - fpStepCount
-
-            #if saveValue >= 50:
+            
             saves[saveValue] = saves.get(saveValue, 0) + 1
+            if saveValue >= 100:
+                savesOver100[saveValue] = savesOver100.get(saveValue, 0) + 1
+
+            if saveValue >= 50:
+                savesOver50[saveValue] = savesOver50.get(saveValue, 0) + 1
+            
                 
-    print(saves)
+    #print("Saves",saves)
 
+    
+    myKeys = list(savesOver50.keys())
+    myKeys.sort()
 
-def getCheats_Part2(raceTrack,sp):
-    steps = getSteps(sp,0)
+    # Sorted Dictionary
+    sd = {i: savesOver50[i] for i in myKeys}
+    #print("Saves over 50 dict",sd)
+
+    totalSavesOver100 = 0
+    for save in savesOver100:
+        totalSavesOver100+=savesOver100[save]
+    print("Saves over 100",totalSavesOver100)
+
+def getCheats_Part2(raceTrack,sp,ep):
     cheats = []
 
     nextCell = getMatrixCell(raceTrack,sp)
@@ -88,11 +100,9 @@ def getCheats_Part2(raceTrack,sp):
 
     #Traverse track and determine all cheats for all cells
     while nextCell != "E":
-
-
-        cheatsForCell = getCheatsForCell(raceTrack,currentPos)
-
+        cheatsForCell = getCheatsForCell_3(raceTrack,currentPos)
         if len(cheatsForCell) > 0:
+            #print(cheatsForCell)
             cheats.append((currentPos,cheatsForCell))
         
         nextTrackPos = getNextTrackPos(raceTrack,currentPos)
@@ -100,14 +110,120 @@ def getCheats_Part2(raceTrack,sp):
         nextCell = getMatrixCell(raceTrack,nextTrackPos)
         currentPos = nextTrackPos
         
-        #print(nextCell)
+        
 
     return cheats
 
-def getCheatsForCell(raceTrack,pos):
-    #BFS - with queue - second attempt
+def getCheatsForCell_3(raceTrack,pos):
 
-    return []    
+    x = pos[0]
+    y = pos[1]
+    
+    startDist = initDistances[y][x]
+
+    cheats = []
+    thisCell = raceTrack[y][x]
+
+    
+    for i in range(-20,21):
+        newX = x + i
+
+        for j in range (-20,21):
+            #print(i,j)
+            newY = y + j
+            totalStep = abs(i)+abs(j)
+            if totalStep < 2 or  totalStep>20:
+                continue
+            newPos = (newX,newY)
+
+            if newX < 0 or newY <0:
+                continue
+
+            try:
+                endDist = initDistances[newY][newX]
+            except:
+                continue
+
+            if endDist == -1:
+                continue
+
+
+            save = endDist-startDist-totalStep
+            if save > 0:
+                #print(save)
+                cheats.append((newPos,save))
+
+    return cheats
+    
+
+
+def getCheatsForCell(raceTrack,pos,ep):
+    #BFS - with queue - second attempt
+    startDist = getMatrixCell(initDistances,pos)
+    
+    c = len(raceTrack[0])
+    r = len(raceTrack)
+    finPositionsWithStepCount = []
+    finPositionsAdded = {}
+    consideredPositions = []
+    x = pos[0]
+    y = pos[1]
+    nextPositions = [((x+1,y),1,[pos]),((x-1,y),1,[pos]),((x,y+1),1,[pos]),((x,y-1),1,[pos])]
+    #print(pos)
+    validX1 = min(ep[0],x)
+    validX2 = max(ep[0],x)
+    
+    validY1 = min(ep[1],y)
+    validY2 = max(ep[1],y)
+
+    while len(nextPositions) > 0:
+        currentPosition = nextPositions.pop(0)
+        cp = currentPosition[0]
+        stepCount = currentPosition[1]
+        #print(stepCount)
+        #print("CurrentPosition object",currentPosition)
+        visitedPositions = currentPosition[2]
+        #print(visitedPositions)
+
+        cX = cp[0]
+        cY = cp[1]
+
+        if stepCount > 20:
+            continue
+        
+        if cp in visitedPositions:
+            continue
+        if cp in consideredPositions:
+            continue
+
+        if cX == 0 or cY == 0 or cX == c-1 or cY == r-1:
+            continue
+
+        if cX < validX1 or cY < validY1 or cX > validX2 or cY > validY2:
+            continue
+
+        cell = getMatrixCell(raceTrack,cp)
+        
+        if cell == "." or cell == "E":
+            #End of cheat
+            cellDist = getMatrixCell(initDistances,cp)
+            for vp in visitedPositions:
+                consideredPositions.append(vp)
+
+            if (cellDist - startDist - (stepCount+1)) > 0:
+                if not cp in finPositionsAdded:
+                    finPositionsAdded[cp] = True
+                    finPositionsWithStepCount.append((cp,stepCount))
+                
+        elif cell == "#":
+            #Cheat continues:
+            sc = stepCount+1
+
+            nextPosForCell = [((cX+1,cY),sc,visitedPositions + [cp]),((cX-1,cY),sc,visitedPositions + [cp]),((cX,cY+1),sc,visitedPositions + [cp]),((cX,cY-1),sc,visitedPositions + [cp])]
+            nextPositions.extend(nextPosForCell)
+    
+
+    return finPositionsWithStepCount   
 
     #Recursively determine possible cheats - first attempt
 ##    global visitedCellsDists
@@ -134,7 +250,7 @@ def getCheatsForCell_rec(raceTrack,pos,step,startDist,fromPos):
     if x == 0 or y == 0 or x == c-1 or y == r-1:
         return []
 
-    if step >= 20:
+    if step > 20:
         return []
 
     if pos in visitedCellsDists and visitedCellsDists[pos] <= step:
