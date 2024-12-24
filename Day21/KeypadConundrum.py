@@ -9,75 +9,122 @@ def main():
             codes.append(line.strip())
 
     print(codes)
-
-    cnp = (2,3)
-    global numpad
-    numpad = {}
-    numpad['7'] = (0,0)
-    numpad['8'] = (1,0)
-    numpad['9'] = (2,0)
-    numpad['4'] = (0,1)
-    numpad['5'] = (1,1)
-    numpad['6'] = (2,1)
-    numpad['1'] = (0,2)
-    numpad['2'] = (1,2)
-    numpad['3'] = (2,2)
-    numpad['0'] = (1,3)
-    numpad["A"] = (2,3)
-
-    global keypad
-    keypad = {}
-    ckp = (2,0)
-    keypad["^"] = (1,0)
-    keypad["A"] = (2,0)
-    keypad["<"] = (0,1)
-    keypad["v"] = (1,1)
-    keypad[">"] = (2,1)
     
-    complexities = 0
+    getNumpad()
+    getKeypad()
+
+    
+    complexities = getCodeComplexities_2_DFS(codes)
+
+    print("Complexities:",complexities)
+
+def getCodeComplexities_2_DFS(codes):
     cnp = (2,3)
-    ckp1 = (2,0)
-    ckp2 = (2,0)
+    ckp = (2,0)
+    complexities = 0
+
+    for code in codes:
+        print(code)
+
+        #Get all shortest numpad paths
+
+        paths = getPaths(code,cnp)
+        print(paths)
+
+    return complexities
+
+def getPaths(code,cp):
+    shortestPathLength = 0
+    letterPos = 1
+    neededLetter = code[:letterPos]
+    
+    print(neededLetter)
+
+    x = cp[0]
+    y = cp[1]
+
+    def explorePath(neededLetter,cp,path,step):
+        global numpad
+        nonlocal shortestPathLength
+        print("CP",cp)
+        x = cp[0]
+        y = cp[1]
+        if x < 0 or y < 0:
+            return []
+        if x == 0 and y == 3:
+            return []
+        try:
+            cell = numpad[y][x]
+        except:
+            return []
+
+        print("Cell")
+
+
+        if cell == neededLetter:
+            if len(path) == shortestPathLength or shortestPathLength == 0:
+                shortestPathLength = len(path)
+                return [path]
+            else:
+                return []    
+        
+        return (explorePath(neededLetter,(x+1,y),path+">",">")
+         + explorePath(neededLetter,(x-1,y),path + "<","<")
+         + explorePath(neededLetter,(x,y+1),path+"v","v")
+         + explorePath(neededLetter,(x,y-1),path + "^","^")
+         )
+
+    paths = (explorePath(neededLetter,(x+1,y),">",">")
+         + explorePath(neededLetter,(x-1,y),"<","<")
+         + explorePath(neededLetter,(x,y+1),"v","v")
+         + explorePath(neededLetter,(x,y-1),"^","^")
+         )
+
+    return paths
+
+    
+def getCodeComplexities_1_naive(codes):
+    cnp = (2,3)
+    ckp = (2,0)
+    complexities = 0
     for code in codes:
         
         numpadStrokes = ""
         symbolStrokes = []
         for symbol in code:
-            #print(symbol)
+
             cnp,currentStrokes = getNumpadStrokes(cnp,symbol)
             symbolStrokes.append(currentStrokes)
             numpadStrokes += currentStrokes
-        print(numpadStrokes)
+
 
         firstKeypadStrokes = ""
         fp = []
-        #ckp = (2,0)
+
         firstKeypadSymbolStrokes = {}
         for ss in symbolStrokes:
-            print("SS",ss)
+
             for symbol in ss:
-                ckp1,currentStrokes = getKeypadStrokes(ckp1,symbol,False)
+                ckp,currentStrokes = getKeypadStrokes(ckp,symbol,False)
                 
                 fp.append(currentStrokes)
                 firstKeypadStrokes += currentStrokes
-        print (firstKeypadStrokes)
+
 
         secondKeypadStrokes = ""
-        #ckp = (2,0)
+
         for f in fp:
-            print("F",f)
+
             for symbol in f:
-                ckp2,currentStrokes = getKeypadStrokes(ckp2,symbol,False)
+                ckp,currentStrokes = getKeypadStrokes(ckp,symbol,False)
                 secondKeypadStrokes += currentStrokes
-                print("CS",currentStrokes)
-        print (secondKeypadStrokes)
-        print(len(secondKeypadStrokes))
+
         codeAsNumber = getCodeNumeric(code)
-        print(codeAsNumber)
+
         codeComplexity = len(secondKeypadStrokes) * codeAsNumber
         complexities += codeComplexity
         
-    print("Complexities:",complexities)
+    return complexities
 
 def getCodeNumeric(code):
     code = code[:3]
@@ -146,6 +193,30 @@ def getNumpadStrokesFromTo(c1,c2):
         strokes += "<"*(x1-x2)
 
     return strokes
+
+def getNumpad():
+    global numpad
+    numpad = {}
+    numpad['7'] = (0,0)
+    numpad['8'] = (1,0)
+    numpad['9'] = (2,0)
+    numpad['4'] = (0,1)
+    numpad['5'] = (1,1)
+    numpad['6'] = (2,1)
+    numpad['1'] = (0,2)
+    numpad['2'] = (1,2)
+    numpad['3'] = (2,2)
+    numpad['0'] = (1,3)
+    numpad["A"] = (2,3)
+
+def getKeypad():
+    global keypad
+    keypad = {}
+    keypad["^"] = (1,0)
+    keypad["A"] = (2,0)
+    keypad["<"] = (0,1)
+    keypad["v"] = (1,1)
+    keypad[">"] = (2,1)
     
 if __name__ == "__main__":
     main()
