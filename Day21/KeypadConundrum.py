@@ -1,6 +1,6 @@
 def main():
  
-    fileName = "test6.txt"
+    fileName = "test2.txt"
     path = "../../Advent Of Code Cases/Day21/" + fileName
 
     codes = []
@@ -8,7 +8,7 @@ def main():
         for line in file:
             codes.append(line.strip())
 
-    print(codes)
+    #print(codes)
     
     getNumpad()
     getKeypad()
@@ -16,7 +16,7 @@ def main():
 
     complexities = getCodeComplexities_2_BFS(codes)
 
-    print("Complexities:",complexities)
+    #print("Complexities:",complexities)
 
 def getCodeComplexities_2_BFS(codes):
     cnp = (2,3)
@@ -24,7 +24,7 @@ def getCodeComplexities_2_BFS(codes):
     complexities = 0
 
     for code in codes:
-        print(code)
+        print("Current code:",code)
 
         #Get all shortest numpad paths
         paths = getPaths(code,cnp)
@@ -33,17 +33,103 @@ def getCodeComplexities_2_BFS(codes):
     return complexities
 
 def getPaths(code,cp):
+
     paths = []
-    shortestPathLength = 0
-    letterPos = 1
-    
-    neededLetter = code[:letterPos]
-    print(neededLetter)
-    x = cp[0]
-    y = cp[1]
-    
+
+    for i in range(len(code)):
+        letterPos = i+1
+        neededLetter = code[letterPos-1:letterPos]
+
+        print("Needed letter",neededLetter)
+        #print("CP",cp)
+        newPaths = getPathsToLetter(cp,neededLetter)
+        paths.append(newPaths)
+
+        cp = numpad[neededLetter]   
+
     return paths
 
+
+def getPathsToLetter(cp,neededLetter):
+    paths = []
+    shortestPathLength = 0
+    initNode = Node(cp,"",[])
+
+
+    shortestPathLength = 0
+    nodeQueue = [initNode]
+
+    while len(nodeQueue) > 0:
+
+        currentNode = nodeQueue.pop(0)
+        isLegal = currentNode.isLegal()
+        currentPosition = currentNode.position
+        #print("CP", currentPosition)
+        x = currentPosition[0]
+        y = currentPosition[1]
+
+        if not isLegal:
+            continue
+        
+        currentLetter = currentNode.getNumpadLetter()
+
+        triedPositions = currentNode.triedPositions
+        currentPath = currentNode.path
+        x = currentPosition[0]
+
+
+        isTried = currentPosition in triedPositions
+        if isTried:
+            continue        
+
+
+        if currentLetter == neededLetter:
+            if shortestPathLength == 0 or len(currentPath) == shortestPathLength:
+                shortestPathLength = len(currentPath)
+                paths.append(currentPath)
+
+            continue
+
+        if shortestPathLength != 0 and len(currentPath) > shortestPathLength:
+            continue
+
+        #Continue on paths to all 4 sides
+        tp = triedPositions + [currentPosition]
+        nodeQueue.append(Node((x+1,y),currentPath+">",tp))
+        nodeQueue.append(Node((x-1,y),currentPath+"<",tp))
+        nodeQueue.append(Node((x,y+1),currentPath+"v",tp))
+        nodeQueue.append(Node((x,y-1),currentPath+"^",tp))
+
+    return paths
+    
+class Node:
+    def __init__(self,position,path,triedPositions):
+        self.position = position
+        self.path = path
+        self.x = self.position[0]
+        self.y = self.position[1]
+        self.triedPositions = triedPositions
+
+    def getNumpadLetter(self):
+        return numpadMatrix[self.y][self.x]
+
+    def isLegal(self):
+
+        if self.x < 0:
+            return False
+        if self.y < 0:
+            return False
+        try:
+            symbol = self.getNumpadLetter()
+        except:
+            return False
+
+        if symbol == "":
+            return False
+
+        return True
+    
+    
 def getPaths_DFS(code,cp):
     shortestPathLength = 0
     letterPos = 1
@@ -224,6 +310,10 @@ def getNumpad():
     numpad['0'] = (1,3)
     numpad["A"] = (2,3)
 
+def getKeypadMatrix():
+    global keypadMatrix
+    keypadMatrix = [["","^","A"],["<","v",">"]]
+    
 def getKeypad():
     global keypad
     keypad = {}
