@@ -12,13 +12,13 @@ def main():
     
     getNumpad()
     getKeypad()
+    getNumpadMatrix()
 
-    
-    complexities = getCodeComplexities_2_DFS(codes)
+    complexities = getCodeComplexities_2_BFS(codes)
 
     print("Complexities:",complexities)
 
-def getCodeComplexities_2_DFS(codes):
+def getCodeComplexities_2_BFS(codes):
     cnp = (2,3)
     ckp = (2,0)
     complexities = 0
@@ -27,13 +27,24 @@ def getCodeComplexities_2_DFS(codes):
         print(code)
 
         #Get all shortest numpad paths
-
         paths = getPaths(code,cnp)
         print(paths)
 
     return complexities
 
 def getPaths(code,cp):
+    paths = []
+    shortestPathLength = 0
+    letterPos = 1
+    
+    neededLetter = code[:letterPos]
+    print(neededLetter)
+    x = cp[0]
+    y = cp[1]
+    
+    return paths
+
+def getPaths_DFS(code,cp):
     shortestPathLength = 0
     letterPos = 1
     neededLetter = code[:letterPos]
@@ -194,6 +205,10 @@ def getNumpadStrokesFromTo(c1,c2):
 
     return strokes
 
+def getNumpadMatrix():
+    global numpadMatrix
+    numpadMatrix = [["7","8","9"],["4","5","6"],["1","2","3"],["","0","A"]]
+    
 def getNumpad():
     global numpad
     numpad = {}
