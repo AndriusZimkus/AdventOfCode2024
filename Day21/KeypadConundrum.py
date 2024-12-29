@@ -1,6 +1,6 @@
 def main():
  
-    fileName = "test2.txt"
+    fileName = "input.txt"
     path = "../../Advent Of Code Cases/Day21/" + fileName
 
     codes = []
@@ -13,10 +13,11 @@ def main():
     getNumpad()
     getKeypad()
     getNumpadMatrix()
+    getKeypadMatrix()
 
     complexities = getCodeComplexities_2_BFS(codes)
 
-    #print("Complexities:",complexities)
+    print("Complexities:",complexities)
 
 def getCodeComplexities_2_BFS(codes):
     cnp = (2,3)
@@ -27,34 +28,114 @@ def getCodeComplexities_2_BFS(codes):
         print("Current code:",code)
 
         #Get all shortest numpad paths
-        paths = getPaths(code,cnp)
-        print(paths)
+        paths = getPaths(code,cnp,True)
+        pathCombos = combinePaths(paths)
+        #print("PS", paths)
+        #print(pathCombos)
+
+        kcs = []
+        for path in pathCombos:
+            #print("Current path:",path)
+
+            #Get all shortest keypad paths
+            paths = getPaths(path,ckp,False)
+            #print("Paths",paths)
+
+            #print("PS", paths)
+
+            keypadCombos = combinePaths(paths)
+            for kc in keypadCombos:
+                #print(kc)
+                kcs.append(kc)
+            
+        #print("kcs", kcs)
+        #for kc in kcs:
+        #    print(kc)
+
+        kcs2 = []
+        for path in kcs:
+            #print("Current path:",path)
+            #if path != "v<<A>>^A<A>AvA<^AA>A<vAAA>^A":
+            #    continue
+
+            #Get all shortest keypad paths
+            paths = getPaths(path,ckp,False)
+            #print("Paths",paths)
+
+            #print("PS", paths)
+
+            keypadCombos = combinePaths(paths)
+
+            for kc in keypadCombos:
+                #print(kc)
+                kcs2.append(kc)
+            
+
+
+        #print(len(kcs2))
+        minLength = 0
+        for kc in kcs2:
+            #print(kc)
+            if minLength == 0 or len(kc) < minLength:
+                minLength = len(kc)
+        print("Min",minLength)
+        print("num", getCodeNumeric(code))
+        complexities += minLength*getCodeNumeric(code)
+
+
 
     return complexities
 
-def getPaths(code,cp):
+def combinePaths(paths):
+    pathCombos = []
+        
+    for i in range(len(paths)):
+        currentPaths = paths[i]
+        try:
+            nextPaths = paths[i+1]
+        except:
+            break
+
+        if len(pathCombos) == 0:
+            firstPaths = currentPaths
+        else:
+            firstPaths = pathCombos
+        tempPaths = []
+        
+        for p1 in firstPaths:
+            for p2 in nextPaths:
+                #print("P2",p2)
+                tempPaths.append(p1+p2)
+
+        pathCombos = tempPaths
+
+    
+    return pathCombos
+
+def getPaths(code,cp,isNumpad):
 
     paths = []
 
     for i in range(len(code)):
         letterPos = i+1
-        neededLetter = code[letterPos-1:letterPos]
+        neededSymbol = code[letterPos-1:letterPos]
 
-        print("Needed letter",neededLetter)
+        #print("Needed symbol",neededSymbol)
         #print("CP",cp)
-        newPaths = getPathsToLetter(cp,neededLetter)
+        newPaths = getPathsToSymbol(cp,neededSymbol,isNumpad)
         paths.append(newPaths)
-
-        cp = numpad[neededLetter]   
+        if isNumpad:
+            cp = numpad[neededSymbol]
+        else:
+            cp = keypad[neededSymbol]
 
     return paths
 
 
-def getPathsToLetter(cp,neededLetter):
+def getPathsToSymbol(cp,neededSymbol,isNumpad):
     paths = []
     shortestPathLength = 0
     initNode = Node(cp,"",[])
-
 
     shortestPathLength = 0
     nodeQueue = [initNode]
@@ -62,7 +143,7 @@ def getPathsToLetter(cp,neededLetter):
     while len(nodeQueue) > 0:
 
         currentNode = nodeQueue.pop(0)
-        isLegal = currentNode.isLegal()
+        isLegal = currentNode.isLegal(isNumpad)
         currentPosition = currentNode.position
         #print("CP", currentPosition)
         x = currentPosition[0]
@@ -70,8 +151,11 @@ def getPathsToLetter(cp,neededLetter):
 
         if not isLegal:
             continue
-        
-        currentLetter = currentNode.getNumpadLetter()
+
+        if isNumpad:
+            currentSymbol = currentNode.getNumpadSymbol()
+        else:
+            currentSymbol = currentNode.getKeypadSymbol()
 
         triedPositions = currentNode.triedPositions
         currentPath = currentNode.path
@@ -82,11 +166,10 @@ def getPathsToLetter(cp,neededLetter):
         if isTried:
             continue        
 
-
-        if currentLetter == neededLetter:
+        if currentSymbol == neededSymbol:
             if shortestPathLength == 0 or len(currentPath) == shortestPathLength:
                 shortestPathLength = len(currentPath)
-                paths.append(currentPath)
+                paths.append(currentPath+"A")
 
             continue
 
@@ -110,17 +193,23 @@ class Node:
         self.y = self.position[1]
         self.triedPositions = triedPositions
 
-    def getNumpadLetter(self):
+    def getNumpadSymbol(self):
         return numpadMatrix[self.y][self.x]
 
-    def isLegal(self):
+    def getKeypadSymbol(self):
+        return keypadMatrix[self.y][self.x]
+
+    def isLegal(self,isNumpad):
 
         if self.x < 0:
             return False
         if self.y < 0:
             return False
         try:
-            symbol = self.getNumpadLetter()
+            if isNumpad:
+                symbol = self.getNumpadSymbol()
+            else:
+                symbol = self.getKeypadSymbol()
         except:
             return False
 
