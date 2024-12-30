@@ -1,25 +1,29 @@
+import time
+
 def main():
  
-    fileName = "input.txt"
+    fileName = "test.txt"
     path = "../../Advent Of Code Cases/Day21/" + fileName
 
     codes = []
     with open(path, 'r') as file:
         for line in file:
             codes.append(line.strip())
-
-    #print(codes)
     
     getNumpad()
     getKeypad()
     getNumpadMatrix()
     getKeypadMatrix()
 
-    complexities = getCodeComplexities_2_BFS(codes)
+    #complexities = getCodeComplexities_2_BFS_Part1(codes)
+
+    #print("Complexities, part 1:",complexities)
+
+    complexities = getCodeComplexities_2_BFS_Part2(codes,10)
 
     print("Complexities:",complexities)
-
-def getCodeComplexities_2_BFS(codes):
+    
+def getCodeComplexities_2_BFS_Part2(codes,times):
     cnp = (2,3)
     ckp = (2,0)
     complexities = 0
@@ -29,64 +33,53 @@ def getCodeComplexities_2_BFS(codes):
 
         #Get all shortest numpad paths
         paths = getPaths(code,cnp,True)
-        pathCombos = combinePaths(paths)
-        #print("PS", paths)
-        #print(pathCombos)
+        pathCombos = combinePaths(paths,False)
 
-        kcs = []
-        for path in pathCombos:
-            #print("Current path:",path)
+        for i in range(times):
+            if i>1:
+                print("Run number:", i+1)
+            kcs = []
+            #print("Path combos:", pathCombos)
+            for path in pathCombos:
 
-            #Get all shortest keypad paths
-            paths = getPaths(path,ckp,False)
-            #print("Paths",paths)
+                #Get all shortest keypad paths
+                paths = getPaths(path,ckp,False)
+                if i>1:
+                    print("Got paths")
+                    print(len(paths))
+                    print(paths)
+                    d = 1
+                    for path in paths:
+                        d*=len(path)
+                    print("D",d)
+                keypadCombos = combinePaths(paths,i>1)
+                if i>1:
+                    print("Combined paths")
+                for kc in keypadCombos:
+                    kcs.append(kc)
+                
+            kcs = leaveOnlyShortest(kcs)
+            if i>0:
+                print("pathCombos count:", len(pathCombos))
+                for p in pathCombos:
+                    print(p)
+            pathCombos = kcs
+        
 
-            #print("PS", paths)
-
-            keypadCombos = combinePaths(paths)
-            for kc in keypadCombos:
-                #print(kc)
-                kcs.append(kc)
-            
-        #print("kcs", kcs)
-        #for kc in kcs:
-        #    print(kc)
-
-        kcs2 = []
-        for path in kcs:
-            #print("Current path:",path)
-            #if path != "v<<A>>^A<A>AvA<^AA>A<vAAA>^A":
-            #    continue
-
-            #Get all shortest keypad paths
-            paths = getPaths(path,ckp,False)
-            #print("Paths",paths)
-
-            #print("PS", paths)
-
-            keypadCombos = combinePaths(paths)
-
-            for kc in keypadCombos:
-                #print(kc)
-                kcs2.append(kc)
-            
-
-
-        #print(len(kcs2))
         minLength = 0
-        for kc in kcs2:
-            #print(kc)
+        for kc in kcs:
             if minLength == 0 or len(kc) < minLength:
                 minLength = len(kc)
-        print("Min",minLength)
-        print("num", getCodeNumeric(code))
+        #print("Min",minLength)
+        #print("num", getCodeNumeric(code))
         complexities += minLength*getCodeNumeric(code)
 
-
-
     return complexities
+    
+def getCodeComplexities_2_BFS_Part1(codes):
+    return getCodeComplexities_2_BFS_Part2(codes,2)
 
-def combinePaths(paths):
+def combinePaths(paths,toPrint):
     pathCombos = []
         
     for i in range(len(paths)):
@@ -104,10 +97,12 @@ def combinePaths(paths):
         
         for p1 in firstPaths:
             for p2 in nextPaths:
-                #print("P2",p2)
                 tempPaths.append(p1+p2)
 
         pathCombos = tempPaths
+        pathCombos = leaveOnlyShortest(pathCombos)
+        #if toPrint:
+        #    print(len(pathCombos))
 
     
     return pathCombos
@@ -120,8 +115,6 @@ def getPaths(code,cp,isNumpad):
         letterPos = i+1
         neededSymbol = code[letterPos-1:letterPos]
 
-        #print("Needed symbol",neededSymbol)
-        #print("CP",cp)
         newPaths = getPathsToSymbol(cp,neededSymbol,isNumpad)
         paths.append(newPaths)
         if isNumpad:
@@ -145,7 +138,7 @@ def getPathsToSymbol(cp,neededSymbol,isNumpad):
         currentNode = nodeQueue.pop(0)
         isLegal = currentNode.isLegal(isNumpad)
         currentPosition = currentNode.position
-        #print("CP", currentPosition)
+        
         x = currentPosition[0]
         y = currentPosition[1]
 
@@ -218,7 +211,19 @@ class Node:
 
         return True
     
-    
+def leaveOnlyShortest(paths):
+    length = 0
+    newPaths = []
+    for path in paths:
+        if length == 0 or len(path) < length:
+            length = len(path)
+
+    for path in paths:
+        if len(path) == length:
+            newPaths.append(path)
+
+    return newPaths
+        
 def getPaths_DFS(code,cp):
     shortestPathLength = 0
     letterPos = 1
@@ -413,4 +418,9 @@ def getKeypad():
     keypad[">"] = (2,1)
     
 if __name__ == "__main__":
+    start = time.time()
     main()
+    end = time.time()
+    print(end - start)
+    #Pre 2024-12-30 14.74s
+    #Post 2024-12-30 3.1s
