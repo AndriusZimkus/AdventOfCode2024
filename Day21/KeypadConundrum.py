@@ -1,4 +1,5 @@
 import time
+from itertools import product
 
 def main():
  
