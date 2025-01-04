@@ -2,7 +2,7 @@ import time
 
 def main():
  
-    fileName = "test.txt"
+    fileName = "input.txt"
     path = "../../Advent Of Code Cases/Day23/" + fileName
 
     sets = set()
@@ -27,13 +27,15 @@ def main():
                 currentSet = [first,second,intsec]
 
                 currentSet.sort()
-                currentSet = (currentSet[0],currentSet[1],currentSet[2])
+                currentSet = ",".join(currentSet)
+                #currentSet = (currentSet[0],currentSet[1],currentSet[2])
 
                 sets.add(currentSet)
 
 
     setCount = 0
-    for currentSet in sets:
+    for itSet in sets:
+        currentSet = itSet.split(",")
         if (currentSet[0][0] == "t"
             or currentSet[1][0] == "t"
             or currentSet[2][0] == "t"):
@@ -42,36 +44,59 @@ def main():
     print("Total set count", len(sets))
     print("Part 1 set count:",setCount)
 
-    print(sets)
+    #print(sets)
+
 
     quadruplets = set()
     nextSets = {"A"}
     while len(nextSets) > 0:
         nextSets = getNextSets(connections,sets)
+        #print(nextSets)
 
         if len(nextSets) == 0:
             break
         else:
             sets = nextSets
 
-    print(sets)
-
-def getNextSets(connections,sets):    
     for currentSet in sets:
-        first = currentSet[0]
-        second = currentSet[1]
-        third = currentSet[2]
-        firstCon = connections[first]
-        secondCon = connections[second]
-        thirdCon = connections[third]
+        print("Part 2 password:",currentSet)
 
-        intersection = firstCon & secondCon & thirdCon
+
+def getNextSets(connections,sets):
+    currentLength = 0
+    nextSets = set()
+    for itSet in sets:
+        currentSet = itSet.split(",")
+        if currentLength == 0:
+            currentLength = len(currentSet)
+        #print(currentLength)
+        currents = []
+        conns = []
+
+        for i in range(currentLength):
+            current = currentSet[i]
+            currents.append(current)
+            conns.append(connections[current])
+
+        #Get total intersection
+        intersection = []
+        for i in range(currentLength):
+            try:
+                if len(intersection) == 0:
+                    intersection = conns[i] & conns[i+1]
+                else:
+                    intersection = intersection & conns[i]
+            except:
+                pass
 
         for intsec in intersection:
-            #print(intsec)
-            
-            
+            currentExpanded = currents + [intsec]
+            currentExpanded.sort()
+            nextSets.add(",".join(currentExpanded))
+
     return nextSets
+
+
 
 
 def addToConnections(connections,first,second):
