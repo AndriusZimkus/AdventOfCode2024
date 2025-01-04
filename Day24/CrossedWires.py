@@ -2,7 +2,7 @@ import time
 
 def main():
  
-    fileName = "test.txt"
+    fileName = "input.txt"
     path = "../../Advent Of Code Cases/Day24/" + fileName
 
 
@@ -29,9 +29,49 @@ def main():
 
                 connections.append(Connection(first,second,result,logic))
 
-    for cxn in connections:
-        print(cxn)
-    print(wires)
+    while len(connections) > 0:
+        
+        cxn = connections.pop(0)
+        #print(cxn)
+        cxnEvaluation = cxn.evaluate(wires)
+        if not cxn.first in wires or not cxn.second in wires:
+            connections.append(cxn)
+            continue
+            
+        if cxnEvaluation == "":
+            #print(cxn.first)
+            #print(wires[cxn.first])
+            #print(cxn)
+            connections.append(cxn)
+            continue
+            
+        if not cxn.result in wires:
+            wires[cxn.result] = cxnEvaluation
+
+        
+        #print(cxn.evaluate(wires))
+    #print(wires)
+    zNumbers = ""
+    i = 0
+    while True:
+
+
+        if i < 10:
+            cn = "z0" + str(i)
+        else:
+            cn = "z" + str(i)
+        #print(cn)
+        try:
+            currentResult = wires[cn]
+            zNumbers = str(currentResult) + zNumbers
+
+        except:
+            break
+
+        i+=1
+
+    print(zNumbers)
+    print("Part 1:", int(zNumbers,2))
 
             
 class Connection:
@@ -45,6 +85,31 @@ class Connection:
         return (self.first + " " + self.logic + " " + self.second
                 + " -> " + self.result)
 
+    def evaluate(self,wires):
+
+        if not self.first in wires or not self.second in wires:
+            return ""
+
+        
+        if self.logic == "AND":
+            if wires[self.first] == 1 and wires[self.second] == 1:
+                return 1
+            else:
+                return 0
+        elif self.logic == "OR":
+            if wires[self.first] == 1 or wires[self.second] == 1:
+                return 1
+            else:
+                return 0
+        elif self.logic == "XOR":
+            if wires[self.first] != wires[self.second]:
+                return 1
+            else:
+                return 0
+        else:
+            assert False
+        
+        
         
 if __name__ == "__main__":
     start = time.time()
