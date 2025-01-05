@@ -8,6 +8,7 @@ def main():
 
     wires = {}
     connections = []
+    relations = {}
 
     with open(path, 'r') as file:
         currentNumber = 0
@@ -27,52 +28,97 @@ def main():
                 second = condition[2]
                 logic = condition[1]
 
+                if first in relations:
+                    relations[first].append(result)
+                else:
+                    relations[first] = [result]
+
+                if second in relations:
+                    relations[second].append(result)
+                else:
+                    relations[second] = [result]
+
                 connections.append(Connection(first,second,result,logic))
 
-    while len(connections) > 0:
+    newWires = updateWires(wires,connections)
+
+    zWGN = int(getWireGroupNumber(newWires,"z"),2)
+    xWGN = int(getWireGroupNumber(newWires,"x"),2)
+    yWGN = int(getWireGroupNumber(newWires,"y"),2)
+    
+    print("Part 1:", zWGN)
+    #print("X", xWGN)
+    #print("Y", yWGN)
+    #print("Z", zWGN)
+    #print("Part 2:",xWGN + yWGN == zWGN)
+    
+    print("Connection count", len(connections))
+
+    
+    i1 = 0
+    i2 = 1
+    #print(connections[i1])
+    #print(connections[i2])
+    connections[i1].result,connections[i2].result = connections[i2].result,connections[i1].result
+    #print(connections[i1])
+    #print(connections[i2])
+    newWires2 = updateWires(wires,connections)
+    
+    zWGN = int(getWireGroupNumber(newWires2,"z"),2)
+    xWGN = int(getWireGroupNumber(newWires2,"x"),2)
+    yWGN = int(getWireGroupNumber(newWires2,"y"),2)
+    
+    print("X", xWGN)
+    print("Y", yWGN)
+    print("Z", zWGN)
+    print("Part 2:",xWGN + yWGN == zWGN)
+
+
+def updateWires(wires,connections):
+    newCXNS = connections.copy()
+    wrs = wires.copy()
+
+    #print(wrs)
+
+    while len(newCXNS) > 0:
         
-        cxn = connections.pop(0)
-        #print(cxn)
-        cxnEvaluation = cxn.evaluate(wires)
-        if not cxn.first in wires or not cxn.second in wires:
-            connections.append(cxn)
+        cxn = newCXNS.pop(0)
+
+        cxnEvaluation = cxn.evaluate(wrs)
+        if not cxn.first in wrs or not cxn.second in wrs:
+            newCXNS.append(cxn)
             continue
             
         if cxnEvaluation == "":
-            #print(cxn.first)
-            #print(wires[cxn.first])
-            #print(cxn)
-            connections.append(cxn)
+            newCXNS.append(cxn)
             continue
             
-        if not cxn.result in wires:
-            wires[cxn.result] = cxnEvaluation
+        if not cxn.result in wrs:
+            wrs[cxn.result] = cxnEvaluation
 
-        
-        #print(cxn.evaluate(wires))
-    #print(wires)
-    zNumbers = ""
+    return wrs
+
+def getWireGroupNumber(wires,group):
+    binaryNumber = ""
+    
+    binaryNumber = ""
     i = 0
     while True:
-
-
         if i < 10:
-            cn = "z0" + str(i)
+            cn = group + "0" + str(i)
         else:
-            cn = "z" + str(i)
-        #print(cn)
+            cn = group + str(i)
+
         try:
             currentResult = wires[cn]
-            zNumbers = str(currentResult) + zNumbers
+            binaryNumber = str(currentResult) + binaryNumber
 
         except:
             break
 
         i+=1
 
-    print(zNumbers)
-    print("Part 1:", int(zNumbers,2))
-
+    return binaryNumber
             
 class Connection:
     def __init__(self,first,second,result,logic):
