@@ -3,7 +3,7 @@ from itertools import product
 
 def main():
  
-    fileName = "test.txt"
+    fileName = "test2.txt"
     path = "../../Advent Of Code Cases/Day21/" + fileName
 
     codes = []
@@ -17,53 +17,108 @@ def main():
     getKeypadMatrix()
 
     #complexities = getCodeComplexities_2_BFS_Part1(codes)
-
+    
     #print("Complexities, part 1:",complexities)
 
-    complexities = getCodeComplexities_2_BFS_Part2(codes,10)
+    #1972
+    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,2)
 
     print("Complexities:",complexities)
+
+def getCodeComplexities_3_BFS_NoCombinations(codes,times):
+    cnp = (2,3)
+
+    complexities = 0
     
+    for code in codes:
+
+        codeActionCount = 0
+
+        for symbol in code:
+            #Every letter separately
+            symbolActionCount = 0
+            #Get all shortest numpad paths
+            paths,cnp = getPathsForSymbol(symbol,cnp,True)
+
+            print("Numpad paths",paths)
+            #symbolActionCount = len(paths)
+            pathGroups = [paths]
+            
+            for i in range(times):
+                
+                print("PG",pathGroups)
+                ckp = (2,0)
+                
+                currentPathGroups = []
+                
+                for pathGroup in pathGroups:
+                    currentPathGroup = []
+                    for path in pathGroup:
+                        #Get all shortest keypad paths
+                        currentSymbolPaths = []
+                        for symbolKey in path:
+                            symbolPaths,ckp = getPathsForSymbol(symbolKey,ckp,False)
+                            currentSymbolPaths.append(symbolPaths)
+                            #for sP in symbolPaths:
+                                #currentPathGroup.append(symbolPaths)
+                    currentPathGroup.append(currentSymbolPaths)
+
+                currentPathGroups.append(currentPathGroup)
+
+                if i < times-1:
+                    pathGroups = currentPathGroups
+
+            print("CPG",currentPaths)     
+
+                
+    
+                
+
+
+        complexities += codeActionCount*getCodeNumeric(code)
+
+    return complexities
+
+def getPathsForSymbol(symbol,cp,isNumpad):
+
+    paths = getPathsToSymbol(cp,symbol,isNumpad)
+
+    if isNumpad:
+        cp = numpad[symbol]
+    else:
+        cp = keypad[symbol]
+
+    return paths,cp
+
 def getCodeComplexities_2_BFS_Part2(codes,times):
     cnp = (2,3)
     ckp = (2,0)
     complexities = 0
 
     for code in codes:
-        print("Current code:",code)
-
         #Get all shortest numpad paths
         paths = getPaths(code,cnp,True)
-        pathCombos = combinePaths(paths,False)
+
+        pathCombos = combinePaths(paths)
 
         for i in range(times):
-            if i>1:
-                print("Run number:", i+1)
+
             kcs = []
-            #print("Path combos:", pathCombos)
+
             for path in pathCombos:
 
                 #Get all shortest keypad paths
                 paths = getPaths(path,ckp,False)
-                if i>1:
-                    print("Got paths")
-                    print(len(paths))
-                    print(paths)
-                    d = 1
-                    for path in paths:
-                        d*=len(path)
-                    print("D",d)
-                keypadCombos = combinePaths(paths,i>1)
-                if i>1:
-                    print("Combined paths")
+
+                keypadCombos = combinePaths(paths)
+
+
+                    
                 for kc in keypadCombos:
                     kcs.append(kc)
                 
             kcs = leaveOnlyShortest(kcs)
-            if i>0:
-                print("pathCombos count:", len(pathCombos))
-                for p in pathCombos:
-                    print(p)
+
             pathCombos = kcs
         
 
@@ -71,8 +126,7 @@ def getCodeComplexities_2_BFS_Part2(codes,times):
         for kc in kcs:
             if minLength == 0 or len(kc) < minLength:
                 minLength = len(kc)
-        #print("Min",minLength)
-        #print("num", getCodeNumeric(code))
+
         complexities += minLength*getCodeNumeric(code)
 
     return complexities
@@ -80,7 +134,7 @@ def getCodeComplexities_2_BFS_Part2(codes,times):
 def getCodeComplexities_2_BFS_Part1(codes):
     return getCodeComplexities_2_BFS_Part2(codes,2)
 
-def combinePaths(paths,toPrint):
+def combinePaths(paths):
     pathCombos = []
         
     for i in range(len(paths)):
@@ -102,8 +156,6 @@ def combinePaths(paths,toPrint):
 
         pathCombos = tempPaths
         pathCombos = leaveOnlyShortest(pathCombos)
-        #if toPrint:
-        #    print(len(pathCombos))
 
     
     return pathCombos
