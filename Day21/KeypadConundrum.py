@@ -16,18 +16,25 @@ def main():
     getNumpadMatrix()
     getKeypadMatrix()
 
+    global symbolLengthCache
+    symbolLengthCache = {}
     #complexities = getCodeComplexities_2_BFS_Part1(codes)
     
     #print("Complexities, part 1:",complexities)
 
-    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,5)
+    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,2)
 
     print("Complexities, part 1:",complexities)
 
-    #complexities = getCodeComplexities_3_BFS_NoCombinations(codes,5)
+    symbolLengthCache = {}
+    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,25)
 
-    #print("Complexities, part 2:",complexities)
+    print("Complexities, part 2:",complexities)
 
+    #Complexities, part 1: 270084
+    #Complexities, part 2: 657128
+
+    
 def getCodeComplexities_3_BFS_NoCombinations(codes,times):
     cnp = (2,3)
 
@@ -59,6 +66,7 @@ def getKeypadLength(path,currentDepth,maxDepth,cp):
     ckp = (2,0)
 
     if currentDepth > maxDepth:
+        
         return len(path)
     
     codeActionCount = 0
@@ -67,11 +75,25 @@ def getKeypadLength(path,currentDepth,maxDepth,cp):
 
         minPathLength = 0
         for newPath in newPaths:
-            currentPathLength = getKeypadLength(newPath,currentDepth+1,maxDepth,ckp)
+            currentKey = newPath + ":" + str(currentDepth+1)
+            
+
+            if currentKey in symbolLengthCache:
+                currentPathLength = symbolLengthCache[currentKey]
+                #print("Getting cached",currentKey)
+            else:
+                currentPathLength = getKeypadLength(newPath,currentDepth+1,maxDepth,ckp)
+                symbolLengthCache[currentKey] = currentPathLength
+            #print("CK",currentKey)
+            #print("CPL",currentPathLength)
             if minPathLength == 0 or currentPathLength < minPathLength:
                 minPathLength = currentPathLength
+            
+        
         codeActionCount += minPathLength
-
+        
+    currentKey = path + ":" + str(currentDepth)  
+    symbolLengthCache[path] = codeActionCount
     return codeActionCount
     
 
