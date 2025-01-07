@@ -3,7 +3,7 @@ from itertools import product
 
 def main():
  
-    fileName = "test2.txt"
+    fileName = "input.txt"
     path = "../../Advent Of Code Cases/Day21/" + fileName
 
     codes = []
@@ -20,10 +20,13 @@ def main():
     
     #print("Complexities, part 1:",complexities)
 
-    #1972
-    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,2)
+    complexities = getCodeComplexities_3_BFS_NoCombinations(codes,5)
 
-    print("Complexities:",complexities)
+    print("Complexities, part 1:",complexities)
+
+    #complexities = getCodeComplexities_3_BFS_NoCombinations(codes,5)
+
+    #print("Complexities, part 2:",complexities)
 
 def getCodeComplexities_3_BFS_NoCombinations(codes,times):
     cnp = (2,3)
@@ -35,49 +38,42 @@ def getCodeComplexities_3_BFS_NoCombinations(codes,times):
         codeActionCount = 0
 
         for symbol in code:
-            #Every letter separately
+            #Every letter separately - Get all shortest numpad paths
             symbolActionCount = 0
-            #Get all shortest numpad paths
+
             paths,cnp = getPathsForSymbol(symbol,cnp,True)
 
-            print("Numpad paths",paths)
-            #symbolActionCount = len(paths)
-            pathGroups = [paths]
+            ckp = (2,0)
+            minPathLength = 0
+            for path in paths:
+                currentPathLength = getKeypadLength(path,1,times,ckp)
+                if minPathLength == 0 or currentPathLength < minPathLength:
+                    minPathLength = currentPathLength
+            codeActionCount += minPathLength
             
-            for i in range(times):
-                
-                print("PG",pathGroups)
-                ckp = (2,0)
-                
-                currentPathGroups = []
-                
-                for pathGroup in pathGroups:
-                    currentPathGroup = []
-                    for path in pathGroup:
-                        #Get all shortest keypad paths
-                        currentSymbolPaths = []
-                        for symbolKey in path:
-                            symbolPaths,ckp = getPathsForSymbol(symbolKey,ckp,False)
-                            currentSymbolPaths.append(symbolPaths)
-                            #for sP in symbolPaths:
-                                #currentPathGroup.append(symbolPaths)
-                    currentPathGroup.append(currentSymbolPaths)
-
-                currentPathGroups.append(currentPathGroup)
-
-                if i < times-1:
-                    pathGroups = currentPathGroups
-
-            print("CPG",currentPaths)     
-
-                
-    
-                
-
-
         complexities += codeActionCount*getCodeNumeric(code)
 
     return complexities
+
+def getKeypadLength(path,currentDepth,maxDepth,cp):
+    ckp = (2,0)
+
+    if currentDepth > maxDepth:
+        return len(path)
+    
+    codeActionCount = 0
+    for symbol in path:
+        newPaths,cp = getPathsForSymbol(symbol,cp,False)
+
+        minPathLength = 0
+        for newPath in newPaths:
+            currentPathLength = getKeypadLength(newPath,currentDepth+1,maxDepth,ckp)
+            if minPathLength == 0 or currentPathLength < minPathLength:
+                minPathLength = currentPathLength
+        codeActionCount += minPathLength
+
+    return codeActionCount
+    
 
 def getPathsForSymbol(symbol,cp,isNumpad):
 
